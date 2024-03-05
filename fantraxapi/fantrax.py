@@ -1,0 +1,113 @@
+import logging
+from datetime import datetime
+from typing import Optional, Union, List, Dict, Any
+from requests import Session
+from json.decoder import JSONDecodeError
+from requests.exceptions import RequestException
+
+from fantraxapi.exceptions import FantraxException
+from fantraxapi.objs import ScoringPeriod, Team, Standings
+
+logger = logging.getLogger(__name__)
+
+
+
+class FantraxAPI:
+    """ Main Object Class
+
+        Parameters:
+            league_id (str): Fantrax League ID.
+            session (Optional[Session]): Use you're own Session object
+
+        Attributes:
+            language (str): TMDb Language.
+            include_language (str): Comma-separated list of TMDb Languages to have included with images and videos.
+            account_id (int): TMDb V3 Account ID.
+            session_id (str): TMDb V3 Session ID.
+            v4_account_id (str): TMDb V4 Account ID.
+            v4_access_token (str):  TMDb V4 Access Token.
+    """
+    def __init__(self, league_id: str, session: Optional[Session] = None):
+        self.league_id = league_id
+        self._session = Session() if session is None else session
+        self._teams = None
+
+    @property
+    def teams(self):
+        if self._teams is None:
+            response = self._request("getFantasyTeams")
+            self._teams = []
+            for data in response["fantasyTeams"]:
+                self._teams.append(Team(self, data["id"], data["name"], data["shortName"]))
+        return self._teams
+
+    def team(self, team_id):
+        for team in self.teams:
+            if team.team_id == team_id:
+                return team
+        raise FantraxException(f"Team ID: {team_id} not found")
+
+
+    def _request(self, method, **kwargs):
+        data = {"leagueId": self.league_id}
+        for key, value in kwargs.items():
+            data[key] = value
+        json_data = {"msgs": [{"method": method, "data": data}]}
+        logger.debug(f"Request JSON: {json_data}")
+
+        try:
+            response = self._session.post("https://www.fantrax.com/fxpa/req", params={"leagueId": self.league_id}, json=json_data)
+            response_json = response.json()
+        except (RequestException, JSONDecodeError) as e:
+            raise FantraxException(f"Failed to Connect to {method}: {e}\nData: {data}")
+        logger.debug(f"Response ({response.status_code} [{response.reason}]) {response_json}")
+        if response.status_code >= 400:
+            raise FantraxException(f"({response.status_code} [{response.reason}]) {response_json}")
+        return response_json["responses"][0]["data"]
+
+    def scoring_periods(self):
+        periods = {}
+        response = self._request("getStandings", view="SCHEDULE")
+        self._teams = []
+        for team_id, data in response["fantasyTeamInfo"]:
+            self._teams.append(Team(self, team_id, data["name"], data["shortName"]))
+        for period_data in response["tableList"]:
+            period = ScoringPeriod(self, period_data)
+            periods[period.week] = period
+        return periods
+
+    def standings(self, week=None):
+        if week is None:
+            response = self._request("getStandings")
+        else:
+            response = self._request("getStandings", period=week, timeframeType="BY_PERIOD", timeStartType="FROM_SEASON_START")
+
+        self._teams = []
+        for team_id, data in response["fantasyTeamInfo"].items():
+            self._teams.append(Team(self, team_id, data["name"], data["shortName"]))
+        return Standings(self, response["tableList"][0]["rows"], week=week)
+
+    def max_goalie_games_this_week(self):
+        response = self._request("getTeamRosterInfo", teamId=self.teams[0].team_id, view="GAMES_PER_POS")
+        for maxes in response["gamePlayedPerPosData"]["tableData"]:
+            if maxes["pos"] == "NHL Team Goalies (TmG)":
+                return maxes["max"]
+
+    def playoffs(self):
+        response = self._request("getStandings", view="PLAYOFFS")
+        other_brackets = {}
+        for tab in response["displayedLists"]["tabs"]:
+            if tab["id"].startswith("."):
+                other_brackets[tab["name"]] = tab["id"]
+
+        for obj in response["tableList"]:
+            if obj["caption"] == Standings:
+                continue
+
+
+
+
+
+
+
+

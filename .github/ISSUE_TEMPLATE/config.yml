@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentaion
+    url: https://fantraxapi.metamanager.wiki
+    about: Please check the Documentaion to see if your question has already been answered.
+  - name: Discord
+    url: https://discord.gg/NfH6mGFuAB
+    about: Please use the Plex Meta Manager Discord to ask for support.
+  - name: Discussions
+    url: https://github.com/meisnate12/FantraxAPI/discussions
+    about: Please use Discussions to ask for support.
