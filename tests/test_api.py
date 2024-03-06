@@ -39,5 +39,5 @@ class APITests(unittest.TestCase):
 
     def test_teams(self):
         for team in self.api.teams:
-            self.assertIn(team, team_names)
+            self.assertIn(team.name, team_names)
 
