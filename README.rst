@@ -25,8 +25,6 @@ Welcome to Fantrax Documentation!
     :target: https://pypi.org/project/FantraxAPI/
     :alt: Downloads
 
-|
-
 .. image:: https://img.shields.io/readthedocs/plex-meta-manager?color=%2300bc8c&style=plastic
     :target: https://fantraxapi.metamanager.wiki/en/latest/
     :alt: Wiki
@@ -65,13 +63,50 @@ Documentation_ can be found at Read the Docs.
 .. _Documentation: https://fantraxapi.metamanager.wiki
 
 
-Using the Object API
+Using the API
 ==========================================================
 
+Getting a FantraxAPI Instance
+----------------------------------------------------------
 
+To connect to the Fantrax API you use the FantraxAPI object.
+
+.. code-block:: python
+
+    from fantraxapi import FantraxAPI
+
+    league_id = "96igs4677sgjk7ol"
+
+    api = FantraxAPI(league_id)
+
+
+.. code-block:: python
+
+    import fantraxapi
+
+    api = fantraxapi.FantraxAPI()
+
+
+Usage Examples
+==========================================================
+
+Example: Get the Scores for the Season.
+
+.. code-block:: python
+
+    from fantraxapi import FantraxAPI
+
+    league_id = "96igs4677sgjk7ol"
+
+    api = FantraxAPI(league_id)
+
+    for _, scoring_period in api.scoring_periods().items():
+        print("")
+        print(scoring_period)
 
 Usage & Contributions
 ----------------------------------------------------------
+
 * Source is available on the `Github Project Page <https://github.com/meisnate12/FantraxAPI>`_.
 * Contributors to FantraxAPI own their own contributions and may distribute that code under
   the `MIT license <https://github.com/meisnate12/FantraxAPI/blob/master/LICENSE.txt>`_.

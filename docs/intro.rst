@@ -1,34 +1,34 @@
-Welcome to TMDbAPIs Documentation!
+Welcome to Fantrax Documentation!
 ==========================================================
 
-.. image:: https://img.shields.io/github/v/release/meisnate12/TMDbAPIs?style=plastic
-    :target: https://github.com/meisnate12/TMDbAPIs/releases
+.. image:: https://img.shields.io/github/v/release/meisnate12/FantraxAPI?style=plastic
+    :target: https://github.com/meisnate12/FantraxAPI/releases
     :alt: GitHub release (latest by date)
 
-.. image:: https://img.shields.io/github/actions/workflow/status/meisnate12/TMDbAPIs/tests.yml?branch=master&style=plastic
-    :target: https://github.com/meisnate12/TMDbAPIs/actions/workflows/tests.yml
+.. image:: https://img.shields.io/github/actions/workflow/status/meisnate12/FantraxAPI/tests.yml?branch=master&style=plastic
+    :target: https://github.com/meisnate12/FantraxAPI/actions/workflows/tests.yml
     :alt: Build Testing
 
-.. image:: https://img.shields.io/codecov/c/github/meisnate12/TMDbAPIs?color=greenred&style=plastic
-    :target: https://codecov.io/gh/meisnate12/TMDbAPIs
+.. image:: https://img.shields.io/codecov/c/github/meisnate12/FantraxAPI?color=greenred&style=plastic
+    :target: https://codecov.io/gh/meisnate12/FantraxAPI
     :alt: Build Coverage
 
-.. image:: https://img.shields.io/github/commits-since/meisnate12/TMDbAPIs/latest?style=plastic
-    :target: https://github.com/meisnate12/TMDbAPIs/commits/master
+.. image:: https://img.shields.io/github/commits-since/meisnate12/FantraxAPI/latest?style=plastic
+    :target: https://github.com/meisnate12/FantraxAPI/commits/master
     :alt: GitHub commits since latest release (by date) for a branch
 
-.. image:: https://img.shields.io/pypi/v/TMDbAPIs?style=plastic
-    :target: https://pypi.org/project/tmdbapis/
+.. image:: https://img.shields.io/pypi/v/FantraxAPI?style=plastic
+    :target: https://pypi.org/project/FantraxAPI/
     :alt: PyPI
 
-.. image:: https://img.shields.io/pypi/dm/tmdbapis.svg?style=plastic
-    :target: https://pypi.org/project/tmdbapis/
+.. image:: https://img.shields.io/pypi/dm/FantraxAPI.svg?style=plastic
+    :target: https://pypi.org/project/FantraxAPI/
     :alt: Downloads
 
 |
 
 .. image:: https://img.shields.io/readthedocs/plex-meta-manager?color=%2300bc8c&style=plastic
-    :target: https://tmdbapis.metamanager.wiki/en/latest/
+    :target: https://fantraxapi.metamanager.wiki/en/latest/
     :alt: Wiki
 
 .. image:: https://img.shields.io/discord/822460010649878528?color=%2300bc8c&label=Discord&style=plastic
@@ -50,7 +50,7 @@ Welcome to TMDbAPIs Documentation!
 
 Overview
 ----------------------------------------------------------
-Unofficial Python bindings for the TMDb API. The goal is to make interaction with the API as easy as possible while emulating the endpoints as much as possible
+Unofficial Python bindings for the Fantrax API. The goal is to make interaction with the API as easy as possible while emulating the endpoints as much as possible
 
 
 Installation & Documentation
@@ -58,160 +58,60 @@ Installation & Documentation
 
 .. code-block:: python
 
-    pip install tmdbapis
+    pip install fantraxapi
 
 Documentation_ can be found at Read the Docs.
 
-.. _Documentation: https://tmdbapis.metamanager.wiki
+.. _Documentation: https://fantraxapi.metamanager.wiki
 
 
-Using the Object API
+Using the API
 ==========================================================
 
-
-Getting a TMDbAPIs Instance
+Getting a FantraxAPI Instance
 ----------------------------------------------------------
 
-To create a TMDbAPIs Object you need your V3 API Key, which can be found following `this guide <https://developers.themoviedb.org/3/getting-started/introduction>`_.
+To connect to the FantraxAPI you use the FantraxAPI object.
 
 .. code-block:: python
 
-    from tmdbapis import TMDbAPIs
+    from fantraxapi import FantraxAPI
 
-    apikey = "0010843563404748808d3fc9c562c05e"
+    league_id = "96igs4677sgjk7ol"
 
-    tmdb = TMDbAPIs(apikey)
+    api = FantraxAPI(league_id)
 
-
-Authenticating V3 API Token
-----------------------------------------------------------
-
-To authenticate your TMDb V3 API Token you can either authenticate your TMDb V4 Token or use the :meth:`~tmdbapis.tmdb.TMDbAPIs.authenticate` method.
 
 .. code-block:: python
 
-    from tmdbapis import TMDbAPIs
+    import fantraxapi
 
-    apikey = "0010843563404748808d3fc9c562c05e"
-
-    tmdb = TMDbAPIs(apikey)
-    tmdb.authenticate(username, password)
+    api = fantraxapi.FantraxAPI()
 
 
-Saving a V3 API Authenticated Session
-----------------------------------------------------------
+Usage Examples
+==========================================================
 
-To save your authenticated session use the ``session_id`` Attribute.
+Example: Get the Scores for the Season.
 
-.. code-block:: python
+In this example We grab
 
-    from tmdbapis import TMDbAPIs
-
-    apikey = "0010843563404748808d3fc9c562c05e"
-
-    tmdb = TMDbAPIs(apikey)
-    tmdb.authenticate(username, password)
-    with open("session_id.txt", "w") as text_file:
-        print(tmdb.session_id, file=text_file)
-
-To load the authenticated session use the ``session_id`` Parameter of the :class:`~tmdbapis.tmdb.TMDbAPIs` constructor.
+In this one we get the ``US`` :class:`~nagerapi.Country` Object and call ``public_holidays`` from that object.
 
 .. code-block:: python
 
-    from tmdbapis import TMDbAPIs
+    from fantraxapi import FantraxAPI
 
-    apikey = "0010843563404748808d3fc9c562c05e"
+    league_id = "96igs4677sgjk7ol"
 
-    session_id = None
-    with open("session_id.txt") as text_file:
-        session_id = text_file.readline()
+    api = FantraxAPI(league_id)
 
-    tmdb = TMDbAPIs(apikey, session_id=session_id)
-
-
-Adding TMDb V4 API Read Access Token
-----------------------------------------------------------
-
-To gain read access to TMDb V4's API just provide you're TMDb V4 Access Token either using the ``v4_access_token`` Parameter of the :class:`~tmdbapis.tmdb.TMDbAPIs` constructor or by using the :meth:`~tmdbapis.tmdb.TMDbAPIs.v4_access_token` method.
-
-To gain read access to TMDb V4's API need your TMDb V4 Access Token, which can be found following `this guide <https://developers.themoviedb.org/3/getting-started/introduction>`_.
-
-.. code-block:: python
-
-    from tmdbapis import TMDbAPIs
-
-    apikey = "0010843563404748808d3fc9c562c05e"
-    v4_access_token = "sohsnrfiemrsdvsavvt4h426GWEGW434gSgSdnjhcyuwbBYHBOSIYCBWgyNTYxNTY4OGQ5NTJjZCIsInN1YiI6IjVkMzM5ZmI0MmY4ZDAfdfdgegeGGregerfge34345BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIvfdvsdfveregrgqgfsfghjhOR0shmZZ_ZekFiuyl7o56921C0"
-
-    tmdb = TMDbAPIs(apikey, v4_access_token=v4_access_token)
-
-
-Authenticating TMDb V4 API Token
-----------------------------------------------------------
-
-To authenticate your TMDB V4 Read Access Token it is a multi step process.
-
-    1. Add your TMDb V4 API Read Access Token.
-    2. Authenticate the URL returned from :meth:`~tmdbapis.tmdb.TMDbAPIs.v4_authenticate`.
-    3. Once the URL has been authenticated you must approve it by running :meth:`~tmdbapis.tmdb.TMDbAPIs.v4_approved`.
-
-.. code-block:: python
-
-    from tmdbapis import TMDbAPIs
-
-    apikey = "0010843563404748808d3fc9c562c05e"
-    v4_access_token = "sohsnrfiemrsdvsavvt4h426GWEGW434gSgSdnjhcyuwbBYHBOSIYCBWgyNTYxNTY4OGQ5NTJjZCIsInN1YiI6IjVkMzM5ZmI0MmY4ZDAfdfdgegeGGregerfge34345BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIvfdvsdfveregrgqgfsfghjhOR0shmZZ_ZekFiuyl7o56921C0"
-
-    tmdb = TMDbAPIs(apikey, v4_access_token=v4_access_token)
-
-    print(tmdb.v4_authenticate())
-    input("Navigate to the URL and then hit enter when Authenticated")
-    tmdb.v4_approved()
-
-
-Saving a V4 API Authenticated Token
-----------------------------------------------------------
-
-To save your authenticated token use the ``v4_access_token`` Attribute.
-
-.. code-block:: python
-
-    from tmdbapis import TMDbAPIs
-
-    apikey = "0010843563404748808d3fc9c562c05e"
-    v4_access_token = "sohsnrfiemrsdvsavvt4h426GWEGW434gSgSdnjhcyuwbBYHBOSIYCBWgyNTYxNTY4OGQ5NTJjZCIsInN1YiI6IjVkMzM5ZmI0MmY4ZDAfdfdgegeGGregerfge34345BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIvfdvsdfveregrgqgfsfghjhOR0shmZZ_ZekFiuyl7o56921C0"
-
-    tmdb = TMDbAPIs(apikey, v4_access_token=v4_access_token)
-
-    print(tmdb.v4_authenticate())
-    input("Navigate to the URL and then hit enter when Authenticated")
-    tmdb.v4_approved()
-    with open("access_token.txt", "w") as text_file:
-        print(tmdb.v4_access_token, file=text_file)
-
-To load the authenticated token use the ``v4_access_token`` Parameter of the :class:`~tmdbapis.tmdb.TMDbAPIs` constructor or the :meth:`~tmdbapis.tmdb.TMDbAPIs.v4_access_token` method.
-
-.. code-block:: python
-
-    from tmdbapis import TMDbAPIs
-
-    apikey = "0010843563404748808d3fc9c562c05e"
-
-    v4_access_token = None
-    with open("access_token.txt") as text_file:
-        v4_access_token = text_file.readline()
-
-    tmdb = TMDbAPIs(apikey, v4_access_token=v4_access_token)
-
-
-Hyperlinks
-----------------------------------------------------------
-
-* `TMDb V3 API Docs <https://developers.themoviedb.org/3/getting-started/introduction>`_
-* `TMDb V4 API Docs <https://developers.themoviedb.org/4/getting-started/authorization>`_
+    for _, scoring_period in api.scoring_periods().items():
+        print("")
+        print(scoring_period)
 
 Usage & Contributions
 ----------------------------------------------------------
-* Source is available on the `Github Project Page <https://github.com/meisnate12/tmdbapis>`_.
-* Contributors to TMDbAPIs own their own contributions and may distribute that code under
-  the `MIT license <https://github.com/meisnate12/tmdbapis/blob/master/LICENSE.txt>`_.
+* Source is available on the `Github Project Page <https://github.com/meisnate12/FantraxAPI>`_.
+* Contributors to FantraxAPI own their own contributions and may distribute that code under
+  the `MIT license <https://github.com/meisnate12/FantraxAPI/blob/master/LICENSE.txt>`_.

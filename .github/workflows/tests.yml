@@ -31,15 +31,9 @@ jobs:
 
       - name: Run tests
         env:
-          TMDB_APIKEY: ${{ secrets.TMDB_APIKEY }}
-          TMDB_SESSION: ${{ secrets.TMDB_SESSION }}
-          TMDB_V4_ACCESS: ${{ secrets.TMDB_V4_ACCESS }}
-          TMDB_V4_TOKEN: ${{ secrets.TMDB_V4_TOKEN }}
-          TMDB_USERNAME: ${{ secrets.TMDB_USERNAME }}
-          TMDB_PASSWORD: ${{ secrets.TMDB_PASSWORD }}
-          PAT: ${{ secrets.PAT }}
+          LEAGUE_ID: ${{ secrets.LEAGUE_ID }}
           LOCAL: False
-        run: coverage run -m pytest -s --cov tmdbapis --cov-report xml tests/test*
+        run: coverage run -m pytest -s --cov fantraxapi --cov-report xml tests/test*
 
       - name: Codecov coverage reports
         uses: codecov/codecov-action@v3

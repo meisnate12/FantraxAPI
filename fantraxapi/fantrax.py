@@ -20,12 +20,8 @@ class FantraxAPI:
             session (Optional[Session]): Use you're own Session object
 
         Attributes:
-            language (str): TMDb Language.
-            include_language (str): Comma-separated list of TMDb Languages to have included with images and videos.
-            account_id (int): TMDb V3 Account ID.
-            session_id (str): TMDb V3 Session ID.
-            v4_account_id (str): TMDb V4 Account ID.
-            v4_access_token (str):  TMDb V4 Access Token.
+            league_id (str): Fantrax League ID.
+            teams (List[:class:`~Team`]): List of Teams in the League.
     """
     def __init__(self, league_id: str, session: Optional[Session] = None):
         self.league_id = league_id
@@ -33,7 +29,7 @@ class FantraxAPI:
         self._teams = None
 
     @property
-    def teams(self):
+    def teams(self) -> List[Team]:
         if self._teams is None:
             response = self._request("getFantasyTeams")
             self._teams = []
@@ -41,12 +37,22 @@ class FantraxAPI:
                 self._teams.append(Team(self, data["id"], data["name"], data["shortName"]))
         return self._teams
 
-    def team(self, team_id):
+    def team(self, team_id: str) -> Team:
+        """ :class:`~Team` Object for the given Team ID.
+
+            Parameters:
+                team_id (str): Team ID.
+
+            Returns:
+                :class:`~Team`
+
+            Raises:
+                :class:`FantraxException`: When an Invalid Team ID is provided.
+        """
         for team in self.teams:
             if team.team_id == team_id:
                 return team
         raise FantraxException(f"Team ID: {team_id} not found")
-
 
     def _request(self, method, **kwargs):
         data = {"leagueId": self.league_id}
@@ -65,7 +71,12 @@ class FantraxAPI:
             raise FantraxException(f"({response.status_code} [{response.reason}]) {response_json}")
         return response_json["responses"][0]["data"]
 
-    def scoring_periods(self):
+    def scoring_periods(self) -> Dict[int, ScoringPeriod]:
+        """ :class:`~ScoringPeriod` Objects for the league.
+
+            Returns:
+                Dict[int, :class:`~ScoringPeriod`]
+        """
         periods = {}
         response = self._request("getStandings", view="SCHEDULE")
         self._teams = []
@@ -76,7 +87,15 @@ class FantraxAPI:
             periods[period.week] = period
         return periods
 
-    def standings(self, week=None):
+    def standings(self, week: Optional[Union[int, str]] = None) -> Standings:
+        """ :class:`~Standings` Object for either the current moment in time or after a specific week..
+
+            Parameters:
+                week (Optional[Union[int, str]]): Pulls data for the Standings at the given week.
+
+            Returns:
+                :class:`~Standings`
+        """
         if week is None:
             response = self._request("getStandings")
         else:
@@ -87,11 +106,11 @@ class FantraxAPI:
             self._teams.append(Team(self, team_id, data["name"], data["shortName"]))
         return Standings(self, response["tableList"][0]["rows"], week=week)
 
-    def max_goalie_games_this_week(self):
+    def max_goalie_games_this_week(self) -> int:
         response = self._request("getTeamRosterInfo", teamId=self.teams[0].team_id, view="GAMES_PER_POS")
         for maxes in response["gamePlayedPerPosData"]["tableData"]:
             if maxes["pos"] == "NHL Team Goalies (TmG)":
-                return maxes["max"]
+                return int(maxes["max"])
 
     def playoffs(self):
         response = self._request("getStandings", view="PLAYOFFS")

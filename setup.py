@@ -1,4 +1,4 @@
-import os, tmdbapis
+import os, fantraxapi
 
 from setuptools import setup, find_packages
 
@@ -15,25 +15,26 @@ if os.path.exists("VERSION"):
                 break
 
 setup(
-    name=tmdbapis.__package_name__,
+    name=fantraxapi.__package_name__,
     version=__version__,
-    description=tmdbapis.__description__,
+    description=fantraxapi.__description__,
     long_description=long_descr,
-    url=tmdbapis.__url__,
-    author=tmdbapis.__author__,
-    author_email=tmdbapis.__email__,
-    license=tmdbapis.__license__,
+    url=fantraxapi.__url__,
+    author=fantraxapi.__author__,
+    author_email=fantraxapi.__email__,
+    license=fantraxapi.__license__,
     packages=find_packages(),
     python_requires=">=3.8",
-    keywords=["tmdbapis", "tmdbapi", "tmdb", "wrapper", "api"],
+    keywords=["fantraxapi", "fantrax", "fantasy", "wrapper", "api"],
     install_requires=[
-      "requests"
+      "requests",
+      "setuptools"
     ],
     project_urls={
-      "Documentation": "https://tmdbapis.metamanager.wiki",
+      "Documentation": "https://fantraxapi.metamanager.wiki",
       "Funding": "https://github.com/sponsors/meisnate12",
-      "Source": "https://github.com/meisnate12/TMDbAPIs",
-      "Issues": "https://github.com/meisnate12/TMDbAPIs/issues",
+      "Source": "https://github.com/meisnate12/FantraxAPI",
+      "Issues": "https://github.com/meisnate12/FantraxAPI/issues",
     },
     classifiers=[
       "Development Status :: 5 - Production/Stable",

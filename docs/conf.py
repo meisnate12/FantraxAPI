@@ -15,18 +15,18 @@ import sys, datetime
 from os.path import abspath, dirname, join
 path = dirname(dirname(abspath(__file__)))
 sys.path.append(path)
-sys.path.append(join(path, "tmdbapis"))
-import tmdbapis
+sys.path.append(join(path, "fantraxapi"))
+import fantraxapi
 
 
 # -- Project information -----------------------------------------------------
 
-project = tmdbapis.__project_name__
-author = tmdbapis.__author__
+project = fantraxapi.__project_name__
+author = fantraxapi.__author__
 copyright = f"{datetime.datetime.now().year}, {author}"
 
 # The full version, including alpha/beta/rc tags
-release = tmdbapis.__version__
+release = fantraxapi.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -56,7 +56,7 @@ napoleon_use_param = True
 napoleon_use_rtype = True
 napoleon_use_keyword = True
 autodoc_member_order = 'bysource'
-add_module_names = False
+
 
 master_doc = 'index'
 
@@ -79,4 +79,4 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = []

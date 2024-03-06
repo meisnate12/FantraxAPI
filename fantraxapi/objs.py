@@ -2,8 +2,16 @@ from datetime import datetime, timedelta
 
 
 class Team:
+    """ Represents a single Team.
+
+        Attributes:
+            team_id (str): Team ID.
+            name (str): Team Name.
+            short (str): Team Short Name.
+
+    """
     def __init__(self, api, team_id, name, short):
-        self.api = api
+        self._api = api
         self.team_id = team_id
         self.name = name
         self.short = short
@@ -14,9 +22,20 @@ class Team:
     def __str__(self):
         return self.name
 
+
 class Matchup:
+    """ Represents a single Matchup.
+
+        Attributes:
+            matchup_key (int): Team ID.
+            away (:class:`~Team`): Away Team.
+            away_score (float): Away Team Score.
+            home (:class:`~Team`): Home Team.
+            home_score (float): Home Team Score.
+
+    """
     def __init__(self, api, matchup_key, data):
-        self.api = api
+        self._api = api
         self.matchup_key = matchup_key
         self.away = api.team(data[0]["teamId"])
         self.away_score = float(data[1]["content"])
@@ -47,8 +66,22 @@ class Matchup:
 
 
 class ScoringPeriod:
+    """ Represents a single Scoring Period.
+
+        Attributes:
+            name (str): Name.
+            week (int): Week Number.
+            start (datetime): Start Date of the Period.
+            end (datetime): End Date of the Period.
+            next (datetime): Next Day after the Period.
+            complete (bool): Is the Period Complete?
+            current (bool): Is it the current Period?
+            future (bool): Is the Period in the future?
+            matchups (List[:class:`~Matchup`]): List of Matchups.
+
+    """
     def __init__(self, api, data):
-        self.api = api
+        self._api = api
         self.name = data["caption"]
         self.week = int(self.name[15:])
         dates = data["subCaption"][1:-1].split(" - ")
@@ -62,7 +95,7 @@ class ScoringPeriod:
 
         self.matchups = []
         for i, matchup in enumerate(data["rows"], 1):
-            self.matchups.append(Matchup(self.api, i, matchup["cells"]))
+            self.matchups.append(Matchup(self._api, i, matchup["cells"]))
 
     def __repr__(self):
         return self.__str__()
@@ -79,15 +112,23 @@ class ScoringPeriod:
             output += f"\n{matchup}"
         return output
 
+
 class Standings:
+    """ Represents a single Standings.
+
+        Attributes:
+            week (int): Week Number.
+            ranks (Dict[int, :class:`~Record`]): Team Ranks and their Records.
+
+    """
     def __init__(self, api, data, week=None):
-        self.api = api
+        self._api = api
         self.week = week
         self.ranks = {}
         for obj in data:
             team_id = obj["fixedCells"][1]["teamId"]
             rank = obj["fixedCells"][0]["content"]
-            self.ranks[int(rank)] = Record(self.api, team_id, rank, obj["cells"])
+            self.ranks[int(rank)] = Record(self._api, team_id, rank, obj["cells"])
 
     def __repr__(self):
         return self.__str__()
@@ -102,16 +143,32 @@ class Standings:
 
 
 class Record:
+    """ Represents a single Record of a :class:`~Standings`.
+
+        Attributes:
+            team (:class:`~Team`): Team.
+            rank (int): Standings Rank.
+            win (int): Number of Wins.
+            loss (int): Number of Losses.
+            tie (int): Number of Ties.
+            points (int): Number of Points.
+            win_percentage (float): Win Percentage.
+            games_back (int): Number of Games Back.
+            wavier_wire_order (int): Wavier Wire Claim Order.
+            points_for (float): Fantasy Points Against.
+            streak (str): Streak.
+
+    """
     def __init__(self, api, team_id, rank, data):
-        self.api = api
-        self.team = self.api.team(team_id)
+        self._api = api
+        self.team = self._api.team(team_id)
         self.rank = int(rank)
         self.win = int(data[0]["content"])
         self.loss = int(data[1]["content"])
         self.tie = int(data[2]["content"])
         self.points = int(data[3]["content"])
         self.win_percentage = float(data[4]["content"])
-        self.gamesback = int(data[5]["content"])
+        self.games_back = int(data[5]["content"])
         self.wavier_wire_order = int(data[6]["content"])
         self.points_for = float(data[7]["content"].replace(",", ""))
         self.points_against = float(data[8]["content"].replace(",", ""))

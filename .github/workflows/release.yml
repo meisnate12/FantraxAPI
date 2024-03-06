@@ -14,7 +14,7 @@ jobs:
       - name: Create Release for new Tag
         uses: marvinpinto/action-automatic-releases@latest
         with:
-          title: TMDbAPIs ${{ github.event.ref }}
+          title: FantraxAPI ${{ github.event.ref }}
           repo_token: ${{ secrets.PAT }}
           prerelease: false
 

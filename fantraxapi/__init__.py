@@ -2,6 +2,7 @@ import importlib.metadata
 
 from fantraxapi.fantrax import FantraxAPI
 from fantraxapi.exceptions import FantraxException
+from fantraxapi.objs import Team, Matchup, ScoringPeriod, Standings, Record
 
 try:
     __version__ = importlib.metadata.version("fantraxapi")
@@ -17,5 +18,10 @@ __email__ = "meisnate12@gmail.com"
 __license__ = "MIT License"
 __all__ = [
     "FantraxAPI",
-    "FantraxException"
+    "FantraxException",
+    "Team",
+    "Matchup",
+    "ScoringPeriod",
+    "Standings",
+    "Record"
 ]

@@ -1,24 +1,18 @@
 
 .. toctree::
-    :caption: Overview
-    :titlesonly:
+   :caption: Overview
+   :titlesonly:
 
-    intro
-
-.. toctree::
-    :caption: Modules
-    :titlesonly:
-
-    objapi
-    rawapi
-    exceptions
-
+   intro
 
 .. toctree::
-    :caption: Objects
-    :titlesonly:
+   :caption: Modules
+   :titlesonly:
 
-    objs/simple
-    objs/reload
-    objs/image
-    objs/pagination
+   fantrax
+
+.. toctree::
+   :caption: Objects
+   :titlesonly:
+
+   objs
