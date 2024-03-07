@@ -6,7 +6,7 @@ from json.decoder import JSONDecodeError
 from requests.exceptions import RequestException
 
 from fantraxapi.exceptions import FantraxException
-from fantraxapi.objs import ScoringPeriod, Team, Standings
+from fantraxapi.objs import ScoringPeriod, Team, Standings, Trade
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class FantraxAPI:
         periods = {}
         response = self._request("getStandings", view="SCHEDULE")
         self._teams = []
-        for team_id, data in response["fantasyTeamInfo"]:
+        for team_id, data in response["fantasyTeamInfo"].items():
             self._teams.append(Team(self, team_id, data["name"], data["shortName"]))
         for period_data in response["tableList"]:
             period = ScoringPeriod(self, period_data)
@@ -106,27 +106,38 @@ class FantraxAPI:
             self._teams.append(Team(self, team_id, data["name"], data["shortName"]))
         return Standings(self, response["tableList"][0]["rows"], week=week)
 
+    def pending_trades(self):
+        response = self._request("getPendingTransactions")
+        trades = []
+        for trade in response["tradeInfoList"]:
+            trades.append(Trade(self, trade))
+        return trades
+
     def max_goalie_games_this_week(self) -> int:
         response = self._request("getTeamRosterInfo", teamId=self.teams[0].team_id, view="GAMES_PER_POS")
         for maxes in response["gamePlayedPerPosData"]["tableData"]:
             if maxes["pos"] == "NHL Team Goalies (TmG)":
                 return int(maxes["max"])
 
-    def playoffs(self):
+    def playoffs(self) -> Dict[int, ScoringPeriod]:
         response = self._request("getStandings", view="PLAYOFFS")
         other_brackets = {}
         for tab in response["displayedLists"]["tabs"]:
             if tab["id"].startswith("."):
                 other_brackets[tab["name"]] = tab["id"]
 
+        playoff_periods = {}
         for obj in response["tableList"]:
-            if obj["caption"] == Standings:
+            if obj["caption"] == "Standings":
                 continue
+            period = ScoringPeriod(self, obj)
+            playoff_periods[period.week] = period
 
+        for name, bracket_id in other_brackets.items():
+            response = self._request("getStandings", view=bracket_id)
+            for obj in response["tableList"]:
+                if obj["caption"] == "Standings":
+                    continue
+                playoff_periods[int(obj["caption"][17:])].add_matchups(obj)
 
-
-
-
-
-
-
+        return playoff_periods

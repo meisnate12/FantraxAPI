@@ -2,7 +2,7 @@ import importlib.metadata
 
 from fantraxapi.fantrax import FantraxAPI
 from fantraxapi.exceptions import FantraxException
-from fantraxapi.objs import Team, Matchup, ScoringPeriod, Standings, Record
+from fantraxapi.objs import DraftPick, Matchup, Player, Record, ScoringPeriod, Standings, Team, Trade
 
 try:
     __version__ = importlib.metadata.version("fantraxapi")
@@ -19,9 +19,12 @@ __license__ = "MIT License"
 __all__ = [
     "FantraxAPI",
     "FantraxException",
-    "Team",
+    "DraftPick",
     "Matchup",
+    "Player",
+    "Record",
     "ScoringPeriod",
     "Standings",
-    "Record"
+    "Team",
+    "Trade",
 ]
