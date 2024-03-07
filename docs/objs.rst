@@ -1,7 +1,8 @@
-Team
+
+DraftPick
 --------------------
 
-.. autoclass:: fantraxapi.Team
+.. autoclass:: fantraxapi.DraftPick
     :members:
 
 
@@ -9,6 +10,20 @@ Matchup
 --------------------
 
 .. autoclass:: fantraxapi.Matchup
+    :members:
+
+
+Player
+--------------------
+
+.. autoclass:: fantraxapi.Player
+    :members:
+
+
+Record
+--------------------
+
+.. autoclass:: fantraxapi.Record
     :members:
 
 
@@ -26,8 +41,16 @@ Standings
     :members:
 
 
-Record
+Team
 --------------------
 
-.. autoclass:: fantraxapi.Record
+.. autoclass:: fantraxapi.Team
     :members:
+
+
+Trade
+--------------------
+
+.. autoclass:: fantraxapi.Trade
+    :members:
+

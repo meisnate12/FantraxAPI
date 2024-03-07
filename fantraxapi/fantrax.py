@@ -106,7 +106,7 @@ class FantraxAPI:
             self._teams.append(Team(self, team_id, data["name"], data["shortName"]))
         return Standings(self, response["tableList"][0]["rows"], week=week)
 
-    def pending_trades(self):
+    def pending_trades(self) -> List[Trade]:
         response = self._request("getPendingTransactions")
         trades = []
         for trade in response["tradeInfoList"]:

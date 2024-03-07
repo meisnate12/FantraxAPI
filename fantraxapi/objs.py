@@ -273,6 +273,7 @@ class Trade:
         self._api = api
         info = {i["name"]: i["value"] for i in data["usefulInfo"]}
 
+        self.trade_id = data["txSetId"]
         self.proposed_by = self._api.team(data["creatorTeamId"])
         self.proposed = info["Proposed"]
         self.accepted = info["Accepted"]
