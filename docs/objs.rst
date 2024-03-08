@@ -20,6 +20,13 @@ Player
     :members:
 
 
+Position
+--------------------
+
+.. autoclass:: fantraxapi.Position
+    :members:
+
+
 Record
 --------------------
 
@@ -52,5 +59,26 @@ Trade
 --------------------
 
 .. autoclass:: fantraxapi.Trade
+    :members:
+
+
+TradeBlock
+--------------------
+
+.. autoclass:: fantraxapi.TradeBlock
+    :members:
+
+
+TradePlayer
+--------------------
+
+.. autoclass:: fantraxapi.TradePlayer
+    :members:
+
+
+Transaction
+--------------------
+
+.. autoclass:: fantraxapi.Transaction
     :members:
 

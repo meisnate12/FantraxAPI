@@ -78,37 +78,50 @@ class Matchup:
 
 
 class Player:
-    """ Represents a single Draft Pick.
+    """ Represents a single Player.
 
         Attributes:
-            from_team (:class:`~Team`]): Team Traded From.
-            to_team (:class:`~Team`]): Team Traded To.
+            id (str): Player ID.
             name (str): Player Name.
             short_name (str): Player Short Name.
             team_name (str): Team Name.
             team_short_name (str): Team Short Name.
-            pos (str): Player Position.
-            ppg (float): Fantasy Points Per Game.
-            points (float): Total Fantasy Points.
+            pos_short_name (str): Player Positions.
+            positions (List[Position]): Player Positions.
 
     """
-    def __init__(self, api, data):
+    def __init__(self, api, data, transaction_type=None):
         self._api = api
-        self.from_team = self._api.team(data["from"]["teamId"])
-        self.to_team = self._api.team(data["to"]["teamId"])
-        self.name = data["scorer"]["name"]
-        self.short_name = data["scorer"]["shortName"]
-        self.team_name = data["scorer"]["teamName"]
-        self.team_short_name = data["scorer"]["teamShortName"]
-        self.pos = data["scorer"]["posShortNames"]
-        self.ppg = data["scorePerGame"]
-        self.points = data["score"]
+        self.type = transaction_type
+        self.id = data["scorerId"]
+        self.name = data["name"]
+        self.short_name = data["shortName"]
+        self.team_name = data["teamName"]
+        self.team_short_name = data["teamShortName"] if "teamShortName" in data else self.team_name
+        self.pos_short_name = data["posShortNames"]
+        self.positions = [self._api.positions[d] for d in data["posIdsNoFlex"]]
 
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
-        return f"From: {self.from_team.name} To: {self.to_team.name} Player: {self.name} {self.pos} - {self.team_short_name} {self.ppg} {self.points}"
+        return f"{self.type} {self.name}"
+
+
+class Position:
+    """ Represents a single Position.
+
+        Attributes:
+            id (str): Position ID.
+            name (str): Position Name.
+            short_name (str): Position Short Name.
+
+    """
+    def __init__(self, api, data):
+        self._api = api
+        self.id = data["id"]
+        self.name = data["name"]
+        self.short_name = data["shortName"]
 
 
 class Record:
@@ -266,7 +279,7 @@ class Trade:
             proposed (str): Datetime Trade was Proposed.
             accepted (str): Datetime Trade was Accepted.
             executed (str): Datetime Trade will be Executed.
-            moves (List[Union(:class:`~DraftPick`, :class:`~Player`)]): Team Short Name.
+            moves (List[Union(:class:`~DraftPick`, :class:`~TradePlayer`)]): Team Short Name.
 
     """
     def __init__(self, api, data):
@@ -280,10 +293,111 @@ class Trade:
         self.executed = info["To be executed"]
         self.moves = []
         for move in data["moves"]:
-            self.moves.append(DraftPick(self._api, move) if "draftPick" in move else Player(self._api, move))
+            self.moves.append(DraftPick(self._api, move) if "draftPick" in move else TradePlayer(self._api, move))
 
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
         return "\n".join([str(m) for m in self.moves])
+
+
+class TradeBlock:
+    """ Represents a single Trade Block.
+
+        Attributes:
+            team (:class:`~Team`]): Team of the Trade Block.
+            update_date (datetime): Last Updated Date.
+            note (str): Trading Block Note.
+            players_offered (Dict[str, List[Player]]): Players Offered.
+            positions_wanted (Dict[str, List[Player]]): Players Wanted.
+            positions_offered (List[Position]): Positions Offered.
+            positions_wanted (List[Position]): Positions Wanted.
+            stats_offered (List[str]): Stats Offered.
+            stats_wanted (List[str]): Stats Wanted.
+
+    """
+    def __init__(self, api, data):
+        self._api = api
+        self.team = self._api.team(data["teamId"])
+        self.update_date = datetime.fromtimestamp(data["lastUpdated"]["date"] / 1e3)
+        self.note = data["comment"]["body"] if "comment" in data else ""
+        self.players_offered = {self._api.positions[k].short_name: [Player(self._api, p) for p in players] for k, players in data["scorersOffered"]["scorers"].items()} if "scorersOffered" in data else {}
+        self.players_wanted = {self._api.positions[k].short_name: [Player(self._api, p) for p in players] for k, players in data["scorersWanted"]["scorers"].items()} if "scorersWanted" in data else {}
+        self.positions_offered = [self._api.positions[pos] for pos in data["positionsOffered"]["positions"]] if "positionsOffered" in data else []
+        self.positions_wanted = [self._api.positions[pos] for pos in data["positionsWanted"]["positions"]] if "positionsWanted" in data else []
+        self.stats_offered = [s["shortName"] for s in data["statsOffered"]["stats"]] if "statsOffered" in data else []
+        self.stats_wanted = [s["shortName"] for s in data["statsWanted"]["stats"]] if "statsWanted" in data else []
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return self.note
+
+
+class TradePlayer:
+    """ Represents a single Draft Pick.
+
+        Attributes:
+            from_team (:class:`~Team`]): Team Traded From.
+            to_team (:class:`~Team`]): Team Traded To.
+            name (str): TradePlayer Name.
+            short_name (str): TradePlayer Short Name.
+            team_name (str): Team Name.
+            team_short_name (str): Team Short Name.
+            pos (str): TradePlayer Position.
+            ppg (float): Fantasy Points Per Game.
+            points (float): Total Fantasy Points.
+
+    """
+    def __init__(self, api, data):
+        self._api = api
+        self.from_team = self._api.team(data["from"]["teamId"])
+        self.to_team = self._api.team(data["to"]["teamId"])
+        self.name = data["scorer"]["name"]
+        self.short_name = data["scorer"]["shortName"]
+        self.team_name = data["scorer"]["teamName"]
+        self.team_short_name = data["scorer"]["teamShortName"]
+        self.pos = data["scorer"]["posShortNames"]
+        self.ppg = data["scorePerGame"]
+        self.points = data["score"]
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return f"From: {self.from_team.name} To: {self.to_team.name} TradePlayer: {self.name} {self.pos} - {self.team_short_name} {self.ppg} {self.points}"
+
+
+class Transaction:
+    """ Represents a single Transaction.
+
+        Attributes:
+            id (str): Transaction ID.
+            team (:class:`~Team`]): Team who made te Transaction.
+            date (datetime): Transaction Date.
+            count (str): Number of Players in the Transaction.
+            players (List[Player]): Players in the Transaction.
+            finalized (bool): this is true when all player have been added.
+
+    """
+    def __init__(self, api, data):
+        self._api = api
+        self.id = data["txSetId"]
+        self.team = self._api.team(data["cells"][0]["teamId"])
+        self.date = datetime.strptime(data["cells"][1]["content"], "%a %b %d, %Y, %I:%M%p")
+        self.count = data["numInGroup"]
+        self.players = [Player(self._api, data["scorer"], data["claimType"] if data["transactionCode"] == "CLAIM" else data["transactionCode"])]
+        self.finalized = self.count == 1
+
+    def update(self, data):
+        if data["txSetId"] == self.id:
+            self.players.append(Player(self._api, data["scorer"], data["claimType"] if data["transactionCode"] == "CLAIM" else data["transactionCode"]))
+            self.finalized = True
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return str(self.players)

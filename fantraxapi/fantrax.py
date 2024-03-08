@@ -6,7 +6,7 @@ from json.decoder import JSONDecodeError
 from requests.exceptions import RequestException
 
 from fantraxapi.exceptions import FantraxException
-from fantraxapi.objs import ScoringPeriod, Team, Standings, Trade
+from fantraxapi.objs import ScoringPeriod, Team, Standings, Trade, TradeBlock, Position, Transaction
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,7 @@ class FantraxAPI:
         self.league_id = league_id
         self._session = Session() if session is None else session
         self._teams = None
+        self._positions = None
 
     @property
     def teams(self) -> List[Team]:
@@ -36,6 +37,12 @@ class FantraxAPI:
             for data in response["fantasyTeams"]:
                 self._teams.append(Team(self, data["id"], data["name"], data["shortName"]))
         return self._teams
+
+    @property
+    def positions(self) -> Dict[str, Position]:
+        if self._positions is None:
+            self._positions = {k: Position(self, v) for k, v in self._request("getRefObject", type="Position")["allObjs"].items()}
+        return self._positions
 
     def team(self, team_id: str) -> Team:
         """ :class:`~Team` Object for the given Team ID.
@@ -109,9 +116,29 @@ class FantraxAPI:
     def pending_trades(self) -> List[Trade]:
         response = self._request("getPendingTransactions")
         trades = []
-        for trade in response["tradeInfoList"]:
-            trades.append(Trade(self, trade))
+        if "tradeInfoList" in response:
+            for trade in response["tradeInfoList"]:
+                trades.append(Trade(self, trade))
         return trades
+
+    def trade_block(self):
+        return [TradeBlock(self, block) for block in self._request("getTradeBlocks")["tradeBlocks"] if len(block) > 2]
+
+    def transactions(self, count=100) -> List[Transaction]:
+        response = self._request("getTransactionDetailsHistory", maxResultsPerPage=str(count))
+        transactions = []
+        update = False
+        for row in response["table"]["rows"]:
+            if update:
+                transaction.update(row) # noqa
+                update = False
+            else:
+                transaction = Transaction(self, row)
+            if transaction.count > 1 and not transaction.finalized:
+                update = True
+            else:
+                transactions.append(transaction)
+        return transactions
 
     def max_goalie_games_this_week(self) -> int:
         response = self._request("getTeamRosterInfo", teamId=self.teams[0].team_id, view="GAMES_PER_POS")
