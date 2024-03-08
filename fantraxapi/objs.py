@@ -258,11 +258,12 @@ class Team:
             short (str): Team Short Name.
 
     """
-    def __init__(self, api, team_id, name, short):
+    def __init__(self, api, team_id, name, short, logo):
         self._api = api
         self.team_id = team_id
         self.name = name
         self.short = short
+        self.logo = logo
 
     def __repr__(self):
         return self.__str__()

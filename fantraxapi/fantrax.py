@@ -35,7 +35,7 @@ class FantraxAPI:
             response = self._request("getFantasyTeams")
             self._teams = []
             for data in response["fantasyTeams"]:
-                self._teams.append(Team(self, data["id"], data["name"], data["shortName"]))
+                self._teams.append(Team(self, data["id"], data["name"], data["shortName"], data["logoUrl256"]))
         return self._teams
 
     @property
@@ -88,7 +88,7 @@ class FantraxAPI:
         response = self._request("getStandings", view="SCHEDULE")
         self._teams = []
         for team_id, data in response["fantasyTeamInfo"].items():
-            self._teams.append(Team(self, team_id, data["name"], data["shortName"]))
+            self._teams.append(Team(self, team_id, data["name"], data["shortName"], data["logoUrl512"]))
         for period_data in response["tableList"]:
             period = ScoringPeriod(self, period_data)
             periods[period.week] = period
@@ -110,7 +110,7 @@ class FantraxAPI:
 
         self._teams = []
         for team_id, data in response["fantasyTeamInfo"].items():
-            self._teams.append(Team(self, team_id, data["name"], data["shortName"]))
+            self._teams.append(Team(self, team_id, data["name"], data["shortName"], data["logoUrl512"]))
         return Standings(self, response["tableList"][0]["rows"], week=week)
 
     def pending_trades(self) -> List[Trade]:
