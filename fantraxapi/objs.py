@@ -100,12 +100,13 @@ class Player:
         self.team_short_name = data["teamShortName"] if "teamShortName" in data else self.team_name
         self.pos_short_name = data["posShortNames"]
         self.positions = [self._api.positions[d] for d in data["posIdsNoFlex"]]
+        self.all_positions = [self._api.positions[d] for d in data["posIds"]]
 
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
-        return f"{self.type} {self.name}"
+        return f"{self.type} {self.name}" if self.type else self.name
 
 
 class Position:
@@ -402,3 +403,59 @@ class Transaction:
 
     def __str__(self):
         return str(self.players)
+
+
+class Roster:
+    def __init__(self, api, data):
+        self._api = api
+        self.team = self._api.team(data["myTeamIds"][0])
+        self.active = data["miscData"]["statusTotals"][0]["total"]
+        self.reserve = data["miscData"]["statusTotals"][1]["total"]
+        self.injured = data["miscData"]["statusTotals"][2]["total"]
+        self.rows = []
+        for group in data["tables"]:
+            for row in group["rows"]:
+                if "scorer" in row or row["statusId"] == "1":
+                    self.rows.append(RosterRow(self._api, row))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        rows = "\n".join([str(r) for r in self.rows])
+        return f"{self.team} Roster\n{rows}"
+
+class RosterRow:
+    def __init__(self, api, data):
+        self._api = api
+        self.player = None
+        self.fppg = None
+        if "scorer" in data:
+            self.player = Player(self._api, data["scorer"])
+            self.fppg = float(data["cells"][3]["content"])
+        if data["statusId"] == "1":
+            self.pos_id = data["posId"]
+            self.pos = self._api.positions[self.pos_id]
+        elif data["statusId"] == "3":
+            self.pos_id = "-1"
+            self.pos = Position(self._api, {"id": "-1", "name": "Injured", "shortName": "IR"})
+        else:
+            self.pos_id = "0"
+            self.pos = Position(self._api, {"id": "0", "name": "Reserve", "shortName": "Res"})
+        content = data["cells"][1]["content"]
+        self.opponent = None
+        self.time = None
+        if content:
+            self.opponent, time_str = content.split("\u003cbr/\u003e")
+            self.time = datetime.strptime(time_str.split(" ")[1], "%I:%M%p")
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        if self.player:
+            return f"{self.pos.short_name}: {self.player}{f' vs {self.opponent}' if self.opponent else ''}"
+        else:
+            return f"{self.pos.short_name}: Empty"
+
+

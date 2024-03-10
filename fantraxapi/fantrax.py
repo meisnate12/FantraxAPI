@@ -1,12 +1,10 @@
 import logging
-from datetime import datetime
-from typing import Optional, Union, List, Dict, Any
+from typing import Optional, Union, List, Dict
 from requests import Session
 from json.decoder import JSONDecodeError
 from requests.exceptions import RequestException
-
 from fantraxapi.exceptions import FantraxException
-from fantraxapi.objs import ScoringPeriod, Team, Standings, Trade, TradeBlock, Position, Transaction
+from fantraxapi.objs import ScoringPeriod, Team, Standings, Trade, TradeBlock, Position, Transaction, Roster
 
 logger = logging.getLogger(__name__)
 
@@ -168,3 +166,6 @@ class FantraxAPI:
                 playoff_periods[int(obj["caption"][17:])].add_matchups(obj)
 
         return playoff_periods
+
+    def roster_info(self, team_id):
+        return Roster(self, self._request("getTeamRosterInfo", teamId=team_id))
