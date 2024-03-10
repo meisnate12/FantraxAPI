@@ -101,6 +101,15 @@ class Player:
         self.pos_short_name = data["posShortNames"]
         self.positions = [self._api.positions[d] for d in data["posIdsNoFlex"]]
         self.all_positions = [self._api.positions[d] for d in data["posIds"]]
+        self.injured = False
+        self.suspended = False
+        if "icons" in data:
+            for icon in data["icons"]:
+                if icon["typeId"] in ["1", "2", "6"]: # DtD, Out, IR
+                    self.injured = True
+                elif icon["typeId"] == "6":
+                    self.suspended = True
+
 
     def __repr__(self):
         return self.__str__()
@@ -124,6 +133,8 @@ class Position:
         self.name = data["name"]
         self.short_name = data["shortName"]
 
+    def __eq__(self, other):
+        return (self.id, self.name, self.short_name) == (other.id, other.name, other.short_name)
 
 class Record:
     """ Represents a single Record of a :class:`~Standings`.
@@ -406,11 +417,12 @@ class Transaction:
 
 
 class Roster:
-    def __init__(self, api, data):
+    def __init__(self, api, data, team_id):
         self._api = api
-        self.team = self._api.team(data["myTeamIds"][0])
+        self.team = self._api.team(team_id)
         self.active = data["miscData"]["statusTotals"][0]["total"]
         self.reserve = data["miscData"]["statusTotals"][1]["total"]
+        self.max = data["miscData"]["statusTotals"][1]["max"]
         self.injured = data["miscData"]["statusTotals"][2]["total"]
         self.rows = []
         for group in data["tables"]:
@@ -428,11 +440,7 @@ class Roster:
 class RosterRow:
     def __init__(self, api, data):
         self._api = api
-        self.player = None
-        self.fppg = None
-        if "scorer" in data:
-            self.player = Player(self._api, data["scorer"])
-            self.fppg = float(data["cells"][3]["content"])
+
         if data["statusId"] == "1":
             self.pos_id = data["posId"]
             self.pos = self._api.positions[self.pos_id]
@@ -442,10 +450,17 @@ class RosterRow:
         else:
             self.pos_id = "0"
             self.pos = Position(self._api, {"id": "0", "name": "Reserve", "shortName": "Res"})
+
+        self.player = None
+        self.fppg = None
+        if "scorer" in data:
+            self.player = Player(self._api, data["scorer"])
+            self.fppg = float(data["cells"][3]["content"])
+
         content = data["cells"][1]["content"]
         self.opponent = None
         self.time = None
-        if content:
+        if content and content.endswith(("AM", "PM")):
             self.opponent, time_str = content.split("\u003cbr/\u003e")
             self.time = datetime.strptime(time_str.split(" ")[1], "%I:%M%p")
 

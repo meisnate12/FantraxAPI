@@ -168,4 +168,4 @@ class FantraxAPI:
         return playoff_periods
 
     def roster_info(self, team_id):
-        return Roster(self, self._request("getTeamRosterInfo", teamId=team_id))
+        return Roster(self, self._request("getTeamRosterInfo", teamId=team_id), team_id)
