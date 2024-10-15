@@ -153,20 +153,21 @@ class Record:
             streak (str): Streak.
 
     """
-    def __init__(self, api, team_id, rank, data):
+    def __init__(self, api, team_id, rank, fields, data):
+        print(data)
         self._api = api
         self.team = self._api.team(team_id)
         self.rank = int(rank)
-        self.win = int(data[0]["content"])
-        self.loss = int(data[1]["content"])
-        self.tie = int(data[2]["content"])
-        self.points = int(data[3]["content"])
-        self.win_percentage = float(data[4]["content"])
-        self.games_back = int(data[5]["content"])
-        self.wavier_wire_order = int(data[6]["content"])
-        self.points_for = float(data[7]["content"].replace(",", ""))
-        self.points_against = float(data[8]["content"].replace(",", ""))
-        self.streak = data[9]["content"]
+        self.win = int(data[fields["win"]]["content"]) if "win" in fields else None
+        self.loss = int(data[fields["loss"]]["content"]) if "loss" in fields else None
+        self.tie = int(data[fields["tie"]]["content"]) if "tie" in fields else None
+        self.points = int(data[fields["points"]]["content"]) if "points" in fields else None
+        self.win_percentage = float(data[fields["winpc"]]["content"]) if "winpc" in fields else None
+        self.games_back = float(data[fields["gamesback"]]["content"]) if "gamesback" in fields else None
+        self.wavier_wire_order = int(data[fields["wwOrder"]]["content"]) if "wwOrder" in fields else None
+        self.points_for = float(data[fields["pointsFor"]]["content"].replace(",", "")) if "pointsFor" in fields else None
+        self.points_against = float(data[fields["pointsAgainst"]]["content"].replace(",", "")) if "pointsAgainst" in fields else None
+        self.streak = data[fields["streak"]]["content"] if "streak" in fields else None
 
     def __repr__(self):
         return self.__str__()
@@ -244,10 +245,11 @@ class Standings:
         self._api = api
         self.week = week
         self.ranks = {}
-        for obj in data:
+        fields = {c["key"]: i for i, c in enumerate(data["header"]["cells"])}
+        for obj in data["rows"]:
             team_id = obj["fixedCells"][1]["teamId"]
             rank = obj["fixedCells"][0]["content"]
-            self.ranks[int(rank)] = Record(self._api, team_id, rank, obj["cells"])
+            self.ranks[int(rank)] = Record(self._api, team_id, rank, fields, obj["cells"])
 
     def __repr__(self):
         return self.__str__()
