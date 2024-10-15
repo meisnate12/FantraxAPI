@@ -104,6 +104,66 @@ Example: Get the Scores for the Season.
         print("")
         print(scoring_period)
 
+
+Connecting with a private League
+==========================================================
+
+I was unable to decipher the api login method so in order to connect to a private league or specific pages in a public
+league that are not public you need to use a cookie. The code below uses Google Chrome and the :code:`selenium` and
+:code:`webdriver-manager` packages to open a chrome instance where you can login and after 30 seconds a cookie file with
+that login will be save to :code:`fantraxloggedin.cookie`.
+
+First install the two packages:
+
+.. code-block:: python
+
+    pip install selenium
+    pip install webdriver-manager
+
+Second run the code below and login when the chrome window loads the Fantrax login page:
+
+.. code-block:: python
+
+    import pickle
+    import time
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.chrome.options import Options
+    from webdriver_manager.chrome import ChromeDriverManager
+
+    service = Service(ChromeDriverManager().install())
+
+    options = Options()
+    options.add_argument("--window-size=1920,1600")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36")
+
+    with webdriver.Chrome(service=service, options=options) as driver:
+        driver.get("https://www.fantrax.com/login")
+        time.sleep(30)
+        pickle.dump(driver.get_cookies(), open("fantraxloggedin.cookie", "wb"))
+
+
+Third use the saved cookie file with the wrapper:
+
+.. code-block:: python
+
+    import pickle
+    from fantraxapi import FantraxAPI
+    from requests import Session
+
+    session = Session()
+
+    with open("fantraxloggedin.cookie", "rb") as f:
+        for cookie in pickle.load(f):
+            session.cookies.set(cookie["name"], cookie["value"])
+
+    league_id = "96igs4677sgjk7ol"
+
+    api = FantraxAPI(league_id, session=session)
+
+    print(api.trade_block()) # The Trade Block Page is always private
+
+
 Usage & Contributions
 ----------------------------------------------------------
 

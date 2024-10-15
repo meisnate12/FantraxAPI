@@ -47,12 +47,12 @@ class Matchup:
             self.away = self._api.team(data[0]["teamId"])
         except FantraxException:
             self.away = data[0]["content"]
-        self.away_score = float(data[1]["content"])
+        self.away_score = float(str(data[1]["content"]).replace(',', ''))
         try:
             self.home = self._api.team(data[2]["teamId"])
         except FantraxException:
             self.home = data[2]["content"]
-        self.home_score = float(data[3]["content"])
+        self.home_score = float(str(data[3]["content"]).replace(',', ''))
 
     def winner(self):
         if self.away_score > self.home_score:

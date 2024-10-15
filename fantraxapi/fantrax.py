@@ -3,7 +3,7 @@ from typing import Optional, Union, List, Dict
 from requests import Session
 from json.decoder import JSONDecodeError
 from requests.exceptions import RequestException
-from fantraxapi.exceptions import FantraxException
+from fantraxapi.exceptions import FantraxException, Unauthorized
 from fantraxapi.objs import ScoringPeriod, Team, Standings, Trade, TradeBlock, Position, Transaction, Roster
 
 logger = logging.getLogger(__name__)
@@ -74,6 +74,11 @@ class FantraxAPI:
         logger.debug(f"Response ({response.status_code} [{response.reason}]) {response_json}")
         if response.status_code >= 400:
             raise FantraxException(f"({response.status_code} [{response.reason}]) {response_json}")
+        if "pageError" in response_json:
+            if "code" in response_json["pageError"]:
+                if response_json["pageError"]["code"] == "WARNING_NOT_LOGGED_IN":
+                    raise Unauthorized("Unauthorized: Not Logged in")
+            raise FantraxException(f"Error: {response_json}")
         return response_json["responses"][0]["data"]
 
     def scoring_periods(self) -> Dict[int, ScoringPeriod]:
