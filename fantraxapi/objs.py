@@ -154,7 +154,6 @@ class Record:
 
     """
     def __init__(self, api, team_id, rank, fields, data):
-        print(data)
         self._api = api
         self.team = self._api.team(team_id)
         self.rank = int(rank)
