@@ -162,7 +162,8 @@ class Record:
         self.loss = int(data[fields["loss"]]["content"]) if "loss" in fields else None
         self.tie = int(data[fields["tie"]]["content"]) if "tie" in fields else None
         self.points = int(data[fields["points"]]["content"]) if "points" in fields else None
-        self.win_percentage = float(data[fields["winpc"]]["content"]) if "winpc" in fields else None
+        winpc_raw = data[fields["winpc"]]["content"] if "winpc" in fields else None
+        self.win_percentage = float(winpc_raw) if winpc_raw != "-" else 0
         self.games_back = float(data[fields["gamesback"]]["content"]) if "gamesback" in fields else None
         self.wavier_wire_order = int(data[fields["wwOrder"]]["content"]) if "wwOrder" in fields else None
         self.points_for = float(data[fields["pointsFor"]]["content"].replace(",", "")) if "pointsFor" in fields else None
