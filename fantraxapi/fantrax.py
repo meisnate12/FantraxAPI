@@ -26,6 +26,9 @@ class FantraxAPI:
         self._session = Session() if session is None else session
         self._teams = None
         self._positions = None
+        self._team_and_ids = self.get_team_ids()
+        self._team_and_roster_info = {self._team_and_ids[team_id]: self.roster_info(team_id) for team_id in self._team_and_ids.keys()}
+
 
     @property
     def teams(self) -> List[Team]:
@@ -142,6 +145,16 @@ class FantraxAPI:
             else:
                 transactions.append(transaction)
         return transactions
+
+    def get_team_ids(self):
+        """ Returns a list of Team IDs in the league.
+
+            Returns:
+                List[str]
+        """
+        json_data_to_parse = self._request("getStandings")
+        team_ids = json_data_to_parse["fantasyTeamInfo"].keys()
+        return {team_id: json_data_to_parse["fantasyTeamInfo"][team_id]['name'] for team_id in team_ids}
 
     def max_goalie_games_this_week(self) -> int:
         response = self._request("getTeamRosterInfo", teamId=self.teams[0].team_id, view="GAMES_PER_POS")
