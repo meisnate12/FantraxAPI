@@ -26,9 +26,12 @@ class FantraxAPI:
         self._session = Session() if session is None else session
         self._teams = None
         self._positions = None
-        self._team_and_ids = self.get_team_ids()
-        self._team_and_roster_info = {self._team_and_ids[team_id]: self.roster_info(team_id) for team_id in self._team_and_ids.keys()}
+        self._initialize_team_data()
 
+    def _initialize_team_data(self):
+        self._team_and_ids = self.get_team_ids()
+        self._team_and_roster_info = {self._team_and_ids[team_id]: self.roster_info(team_id) for team_id in
+                                      self._team_and_ids.keys()}
 
     @property
     def teams(self) -> List[Team]:
@@ -147,10 +150,10 @@ class FantraxAPI:
         return transactions
 
     def get_team_ids(self):
-        """ Returns a list of Team IDs in the league.
+        """ Returns a dictionary of Team IDs and their names in the league.
 
             Returns:
-                List[str]
+                Dict[str, str]
         """
         json_data_to_parse = self._request("getStandings")
         team_ids = json_data_to_parse["fantasyTeamInfo"].keys()
