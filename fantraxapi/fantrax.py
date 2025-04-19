@@ -168,7 +168,7 @@ class FantraxAPI:
             for obj in response["tableList"]:
                 if obj["caption"] == "Standings":
                     continue
-                playoff_periods[int(obj["caption"][17:])].add_matchups(obj)
+                playoff_periods['P{}'.format(obj["caption"][25:])].add_matchups(obj)
 
         return playoff_periods
 
