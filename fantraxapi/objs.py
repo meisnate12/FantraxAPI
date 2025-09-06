@@ -76,6 +76,80 @@ class Matchup:
     def __str__(self):
         return f"{self.away} ({self.away_score}) vs {self.home} ({self.home_score})"
 
+class H2HRotisserie2(Matchup):
+    """ Represents a H2H Matchup.
+    Attributes:
+            matchup_key (str): Matchup Key.
+            away (:class:`~Team`): Away Team.
+            away_score (float): Away Team Score.
+            home (:class:`~Team`): Home Team.
+            home_score (float): Home Team Score.
+
+    """
+    scoring_grid = dict()
+    home_score = 0.5
+    away_score = 0.5
+
+    def __init__(self, api, matchup_key, data, home_data, away_data):
+        self._api = api
+        self.matchup_key = matchup_key
+        try:
+            self.away = self._api.team(away_data['fixedCells'][0]["teamId"])
+        except FantraxException:
+            self.away = Team(api, 'bye', 'bye', 'bye', None)
+        try:
+            self.home = self._api.team(home_data['fixedCells'][0]["teamId"])
+        except FantraxException:
+            self.home = Team(api, 'bye', 'bye', 'bye', None)
+
+        self.home_categories = {'opponent': self.away.team_id}
+        self.away_categories = {'opponent': self.home.team_id}
+
+        headers =  self._header_translator(data["header"]['cells'])
+        self._scoreboard_builder(home_data['cells'], away_data['cells'], headers)
+
+    @staticmethod
+    def _header_translator(headers: list[dict]):
+        return {
+            h['shortName']: h['name'] for h in headers
+        }
+
+    def _scoreboard_builder(self, home_cells, away_cells, headers):
+        for i, category in enumerate(headers):
+            if home_cells[i].get('toolTip'):
+                h = home_cells[i].get('toolTip')
+                a = away_cells[i].get('toolTip')
+            else:
+                h = home_cells[i]['content']
+                a = away_cells[i]['content']
+            try:
+                h = float(str(h).replace(',', ''))
+            except ValueError:
+                h = 0
+            try:
+                a = float(str(a).replace(',', ''))
+            except ValueError:
+                a = 0
+
+            self.scoring_grid.update({
+                category: {
+                    self.home.team_id: h,
+                    self.away.team_id: a,
+                }
+            })
+            self.home_categories.update({
+                category: h
+            })
+            self.away_categories.update({
+                category: a
+            })
+            if category == 'Pts':
+                self.home_score = h
+                self.away_score = a
+
+
+
+
 
 class Player:
     """ Represents a single Player.
@@ -181,7 +255,7 @@ class ScoringPeriod:
 
         Attributes:
             name (str): Name.
-            week (int): Week Number.
+            week (str): Week string. S# for regular season P# for playoffs
             start (datetime): Start Date of the Period.
             end (datetime): End Date of the Period.
             next (datetime): Next Day after the Period.
@@ -192,12 +266,19 @@ class ScoringPeriod:
 
     """
     def __init__(self, api, data):
+        self.matchup_types = {
+            'H2hRotisserie2': self._h2h_rot_2_factory
+        }
+
         self._api = api
         self.name = data["caption"]
+        self.matchup_type = data['tableType']
         if self.name.startswith("Scoring Period "):
-            self.week = int(self.name[15:])
+            self.week = 'S{}'.format(self.name[15:])
         if self.name.startswith("Playoffs - Round "):
-            self.week = int(self.name[17:])
+            self.week = 'P{}'.format(self.name[17:])
+        if self.name.startswith("Scoring Period:"):
+            self.week = 'P{}'.format(self.name[25:])
         dates = data["subCaption"][1:-1].split(" - ")
         self.start = datetime.strptime(dates[0], "%a %b %d, %Y")
         self.end = datetime.strptime(dates[1], "%a %b %d, %Y")
@@ -208,14 +289,27 @@ class ScoringPeriod:
         self.current = self.start < now < self.next
         self.future = now < self.start
 
-        self.matchups = []
-        for i, matchup in enumerate(data["rows"], 1):
-            self.matchups.append(Matchup(self._api, i, matchup["cells"]))
+        self.matchups = self._matchup_factory(api, data)
+
+    def _matchup_factory(self, api, data) -> list:
+        if matchup_method := self.matchup_types.get(self.matchup_type):
+            return matchup_method(api, data)
+        else:
+            return {i: Matchup(self._api, i, matchup["cells"]) for i, matchup in enumerate(data["rows"], 1)}
+
+    def _h2h_rot_2_factory(self, api, data) -> dict[H2HRotisserie2]:
+        res = dict()
+        matchup_dict = dict()
+        for row in data["rows"]:
+            muid = row['matchupId']
+            if other_row := matchup_dict.get(muid):
+                res.update({muid: H2HRotisserie2(api, muid, data, row, other_row)})
+            else:
+                matchup_dict.update({muid: row})
+        return res
 
     def add_matchups(self, data):
-
-        for i, matchup in enumerate(data["rows"], len(self.matchups) + 1):
-            self.matchups.append(Matchup(self._api, i, matchup["cells"]))
+        self.matchups.update(self._matchup_factory(self._api, data))
 
     def __repr__(self):
         return self.__str__()
@@ -474,5 +568,4 @@ class RosterRow:
             return f"{self.pos.short_name}: {self.player}{f' vs {self.opponent}' if self.opponent else ''}"
         else:
             return f"{self.pos.short_name}: Empty"
-
 
