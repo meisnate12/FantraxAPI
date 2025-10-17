@@ -1,0 +1,56 @@
+name: Update Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        type: choice
+        description: Choose which type of release to perform.
+        options:
+          - major
+          - minor
+          - patch
+        default: patch
+
+jobs:
+  update-version:
+    name: Update Version
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Check Out Repo
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.PAT }}
+          fetch-depth: 0
+
+      - name: Create Release Commit
+        run: |
+            value=$(cat VERSION)
+            version="${value%-build*}"
+            echo "CURRENT_VERSION: '${version}'"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$version"
+          
+            if [[ "${{ github.event.inputs.release_type }}" == "major" ]]; then
+                NEW_VERSION="$((MAJOR+1)).0.0"
+            elif [[ "${{ github.event.inputs.release_type }}" == "minor" ]]; then
+                NEW_VERSION="${MAJOR}.$((MINOR+1)).0"
+            else
+                NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH+1))"
+            fi
+          
+            echo "NEW_VERSION='${NEW_VERSION}'"
+            echo "new_ver=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "$NEW_VERSION" > "VERSION"
+          
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add VERSION
+            git commit -m "FantraxAPI Release ${NEW_VERSION}"
+            git push origin master
+
+      - name: Tag New Version
+        uses: Kometa-Team/tag-new-version@master
+        with:
+          version-command: |
+            cat VERSION

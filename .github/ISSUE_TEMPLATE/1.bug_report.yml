@@ -9,7 +9,7 @@ body:
     attributes:
       value: >
         **THIS IS NOT THE PLACE TO ASK FOR SUPPORT!**
-        Please use [Ple Meta Manager Discord](https://discord.gg/NfH6mGFuAB) and post your question under the `software-and-hardware` channel for support issues.
+        Please use [Kometa Discord](https://kometa.wiki/en/latest/discord/) and post your question under the `software-and-hardware` channel for support issues.
   - type: input
     id: version
     attributes:

@@ -1,3 +1,11 @@
+coverage
 pytest
 pytest-cov
 python-dotenv
+ruff
+selenium
+sphinx
+sphinx-rtd-theme
+twine
+webdriver-manager
+wheel

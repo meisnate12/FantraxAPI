@@ -1,0 +1,35 @@
+name: Update Copyright Year
+
+on:
+  schedule:
+    - cron: '0 3 1 1 *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Get current year
+        id: date
+        run: echo "year=$(date +'%Y')" >> $GITHUB_OUTPUT
+
+      - name: Check Out Repo
+        uses: actions/checkout@v4
+
+      - name: Update Copyright
+        run: sed -i -E 's/(Copyright \(c\) ).+( meisnate12)/\1${{ steps.date.outputs.year }}\2/' LICENSE
+
+      - name: Check Diff
+        id: verify_diff
+        run: |
+          git diff --quiet . || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit & Push Changes
+        if: steps.verify_diff.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "Copyright updated to ${{ steps.date.outputs.year }}" -a
+          git push origin master

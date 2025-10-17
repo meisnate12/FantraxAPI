@@ -1,4 +1,4 @@
-name: Release
+name: Create Release
 
 on:
   create:
@@ -6,7 +6,7 @@ on:
       - v*
 
 jobs:
-  tagged-release:
+  create-release:
     name: Release
     runs-on: ubuntu-latest
     steps:
@@ -29,13 +29,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install wheel twine
           pip install --no-cache-dir --upgrade --requirement requirements.txt
+          pip install --no-cache-dir --upgrade --requirement requirements-dev.txt
 
-      - name: Build and publish
+      - name: Build PyPI
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           python setup.py sdist bdist_wheel
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
           twine upload dist/*

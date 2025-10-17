@@ -7,6 +7,11 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+*.cook
+*.cookie
+/*.py
+!setup.py
+fantrax.yml
 .idea
 .Python
 build/

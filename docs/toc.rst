@@ -5,14 +5,22 @@
 
    intro
 
+
 .. toctree::
-   :caption: Modules
+   :caption: Main League Object
    :titlesonly:
 
-   fantrax
+   league
+
 
 .. toctree::
    :caption: Objects
    :titlesonly:
 
    objs
+
+.. toctree::
+   :caption: Exceptions
+   :titlesonly:
+
+   exceptions

@@ -11,13 +11,15 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-import sys, datetime
+import datetime
+import sys
 from os.path import abspath, dirname, join
+
 path = dirname(dirname(abspath(__file__)))
 sys.path.append(path)
 sys.path.append(join(path, "fantraxapi"))
-import fantraxapi
 
+import fantraxapi  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -35,11 +37,11 @@ release = fantraxapi.__version__
 # extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.coverage',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.todo'
+    "sphinx.ext.autodoc",
+    "sphinx.ext.coverage",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.todo",
 ]
 
 # -- Napoleon Settings -----------------------------------------------------
@@ -55,10 +57,10 @@ napoleon_use_ivar = True
 napoleon_use_param = True
 napoleon_use_rtype = True
 napoleon_use_keyword = True
-autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 
 
-master_doc = 'index'
+master_doc = "index"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
