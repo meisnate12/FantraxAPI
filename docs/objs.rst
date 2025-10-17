@@ -13,6 +13,13 @@ Game
     :members:
 
 
+LivePlayer
+--------------------
+
+.. autoclass:: fantraxapi.objs.LivePlayer
+    :members:
+
+
 Matchup
 --------------------
 
@@ -124,3 +131,8 @@ Transaction
 .. autoclass:: fantraxapi.objs.Transaction
     :members:
 
+TransactionPlayer
+--------------------
+
+.. autoclass:: fantraxapi.objs.TransactionPlayer
+    :members:

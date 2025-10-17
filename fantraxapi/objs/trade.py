@@ -2,8 +2,10 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from ..exceptions import DateNotInSeason
+from fantraxapi.exceptions import DateNotInSeason
+
 from .base import FantraxBaseObject
+from .player import Player
 from .team import Team
 
 if TYPE_CHECKING:
@@ -96,25 +98,17 @@ class TradePlayer(TradeItem):
         trade (Trade): The Trade instance this TradePlayer belongs to.
         from_team (Team): Fantasy Team Traded From.
         to_team (Team): Fantasy Team Traded To.
-        name (str): Player Name.
-        short_name (str): Player Short Name.
-        team_name (str): Team Name.
-        team_short_name (str): Team Short Name.
-        pos (str): Player Position.
-        ppg (float): Fantasy Points Per Game.
-        points (float): Total Fantasy Points.
+        player (Player): The Player instance this TradePlayer belongs to.
+        fantasy_points_per_game (float): Fantasy Points Per Game.
+        total_fantasy_points (float): Total Fantasy Points.
 
     """
 
     def __init__(self, trade: Trade, data: dict) -> None:
         super().__init__(trade, data)
-        self.name: str = self._data["scorer"]["name"]
-        self.short_name: str = self._data["scorer"]["shortName"]
-        self.team_name: str = self._data["scorer"]["teamName"]
-        self.team_short_name: str = self._data["scorer"]["teamShortName"]
-        self.pos: str = self._data["scorer"]["posShortNames"]
-        self.ppg: float = self._data["scorePerGame"]
-        self.points: float = self._data["score"]
+        self.player: Player = Player(self.league, data["scorer"])
+        self.fantasy_points_per_game: float = self._data["scorePerGame"]
+        self.total_fantasy_points: float = self._data["score"]
 
     def _item_description(self) -> str:
-        return f"TradePlayer: {self.name} {self.pos} - {self.team_short_name} {self.ppg} {self.points}"
+        return f"TradePlayer: {self.player.name} {self.player.pos_short_name} - {self.player.team_short_name} {self.fantasy_points_per_game} {self.total_fantasy_points}"
