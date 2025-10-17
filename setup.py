@@ -21,7 +21,7 @@ setup(
     version=__version__,
     description=fantraxapi.__description__,
     long_description=long_descr,
-    long_description_content_type='text/x-rst',
+    long_description_content_type="text/x-rst",
     url=fantraxapi.__url__,
     author=fantraxapi.__author__,
     author_email=fantraxapi.__email__,

@@ -26,15 +26,11 @@ class Player(FantraxBaseObject):
         out (bool): Player Out.
         injured_reserve (bool): Player on Injured Reserve.
         suspended (bool): Player Suspended.
-        team (Team): Fantasy Team Player is on.
-        points (float): Player Fantasy Points for the Points Date.
-        points_date (date): date Player scored points.
         injured (bool): Player either Day-to-Day, Out, or on Injured Reserve.
     """
 
-    def __init__(self, league: "League", data: dict, transaction_type: str | None = None) -> None:
+    def __init__(self, league: "League", data: dict) -> None:
         super().__init__(league, data)
-        self.type: str | None = transaction_type
         self.id: str = self._data["scorerId"]
         self.name: str = self._data["name"]
         self.short_name: str = self._data["shortName"]
@@ -47,9 +43,6 @@ class Player(FantraxBaseObject):
         self.out: bool = False
         self.injured_reserve: bool = False
         self.suspended: bool = False
-        self.team: Team | None = None
-        self.points: float | None = None
-        self.points_date: date | None = None
         if "icons" in self._data:
             for icon in self._data["icons"]:
                 match icon["typeId"]:
@@ -67,9 +60,34 @@ class Player(FantraxBaseObject):
         return self.day_to_day or self.out or self.injured_reserve
 
     def __str__(self) -> str:
-        return f"{self.type} {self.name}" if self.type else self.name
+        return self.name
 
-    def update_points(self, team_id: str, points: float, points_date: date) -> None:
-        self.team = self.league.team(team_id)
-        self.points = points
-        self.points_date = points_date
+
+class LivePlayer(Player):
+    """Represents a single Player with Live Scoring.
+
+    Attributes:
+        league (League): The League instance this object belongs to.
+        id (str): Player ID.
+        name (str): Player Name.
+        short_name (str): Player Short Name.
+        team_name (str): Team Name.
+        team_short_name (str): Team Short Name.
+        pos_short_name (str): Player Positions.
+        positions (list[Position]): Player Positions.
+        all_positions (list[Position]): Positions Player can be placed into.
+        day_to_day (bool): Player Day-to-Day.
+        out (bool): Player Out.
+        injured_reserve (bool): Player on Injured Reserve.
+        suspended (bool): Player Suspended.
+        injured (bool): Player either Day-to-Day, Out, or on Injured Reserve.
+        team (Team): Fantasy Team Player is on.
+        points (float): Player Fantasy Points for the Points Date.
+        points_date (date): date Player scored points.
+    """
+
+    def __init__(self, league: "League", data: dict, team_id: str, points: float, points_date: date) -> None:
+        super().__init__(league, data)
+        self.team: Team = self.league.team(team_id)
+        self.points: float = points
+        self.points_date: date = points_date

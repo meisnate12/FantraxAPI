@@ -7,7 +7,7 @@ from requests import Session
 from fantraxapi import NotLoggedIn, NotTeamInLeague, api
 
 from ..exceptions import DateNotInSeason, PeriodNotInSeason
-from .player import Player
+from .player import LivePlayer
 from .position import Position, PositionCount
 from .roster import Roster
 from .scoring_period import ScoringPeriod, ScoringPeriodResult
@@ -260,14 +260,14 @@ class League:
         response = api.get_team_roster_position_counts(self, team_id, scoring_period_number=scoring_period_number)
         return {p["posShort"]: PositionCount(self, p) for p in response["gamePlayedPerPosData"]["tableData"]}
 
-    def live_scores(self, scoring_date: date) -> dict[str, list[Player]]:
-        """Returns a Dictionary of Team IDs to a list of Player objects with scores for that day.
+    def live_scores(self, scoring_date: date) -> dict[str, list[LivePlayer]]:
+        """Returns a Dictionary of Team IDs to a list of LivePlayer objects with scores for that day.
 
         Args:
             scoring_date (date): Date of the Live Scoring.
 
         Returns:
-            dict[str, list[Player]]: Dictionary of Team IDs to a list of Player objects with scores for that day.
+            dict[str, list[LivePlayer]]: Dictionary of Team IDs to a list of LivePlayer objects with scores for that day.
 
         Raises:
             DateNotInSeason: When the scoring_date is not in the Season.
@@ -282,7 +282,7 @@ class League:
                 for _, data3 in data2.items():
                     for player in data3:
                         if player["scorer"]["scorerId"] not in scorer_map:
-                            scorer_map[player["scorer"]["scorerId"]] = Player(self, player["scorer"])
+                            scorer_map[player["scorer"]["scorerId"]] = player["scorer"]
         active_teams = []
         for matchup in response["matchups"]:
             team1, team2 = matchup.split("_")
@@ -296,9 +296,8 @@ class League:
                 final_scores[team_id] = []
             for scorer_id, pts in data["ACTIVE"]["statsMap"].items():
                 if not scorer_id.startswith("_"):
-                    player = scorer_map[scorer_id]
-                    player.update_points(team_id, pts["object1"], scoring_date)
-                    final_scores[team_id].append(player)
+                    player_data = scorer_map[scorer_id]
+                    final_scores[team_id].append(LivePlayer(self, player_data, team_id, pts["object1"], scoring_date))
         return final_scores
 
     def team_roster(self, team_id: str, period_number: int | None = None) -> Roster:

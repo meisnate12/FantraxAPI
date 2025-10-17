@@ -1,6 +1,6 @@
 from .game import Game
 from .league import League
-from .player import Player
+from .player import LivePlayer, Player
 from .position import Position, PositionCount
 from .roster import Roster, RosterRow
 from .scoring_period import Matchup, ScoringPeriod, ScoringPeriodResult
@@ -9,12 +9,13 @@ from .status import Status
 from .team import Team
 from .trade import Trade, TradeDraftPick, TradePlayer
 from .trade_block import TradeBlock
-from .transaction import Transaction
+from .transaction import Transaction, TransactionPlayer
 
 __all__ = [
     "TradeDraftPick",
     "Game",
     "League",
+    "LivePlayer",
     "Matchup",
     "Player",
     "Position",
@@ -31,4 +32,5 @@ __all__ = [
     "TradeBlock",
     "TradePlayer",
     "Transaction",
+    "TransactionPlayer",
 ]

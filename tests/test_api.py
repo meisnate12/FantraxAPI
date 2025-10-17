@@ -18,6 +18,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from fantraxapi import League, NotLoggedIn, NotTeamInLeague
 from fantraxapi.exceptions import DateNotInSeason, FantraxException, NotMemberOfLeague, PeriodNotInSeason
+from fantraxapi.objs import Trade
 
 """
 import logging
@@ -210,6 +211,57 @@ class APITests(unittest.TestCase):
         self.assertTrue(standings.ranks[5].points == 2)
         self.assertTrue(standings.ranks[2].team.name == "Bunch of Yahoos")
         self.assertTrue(standings.ranks[1].points_for == 532.8)
+
+    def test_pending_trades(self) -> None:
+        pending_trade = Trade(
+            self.league,
+            {
+                "txSetId": "fdsafdas",
+                "creatorTeamId": "er0c60arm15b60vy",
+                "usefulInfo": [
+                    {"name": "Proposed", "value": "Dec 5, 3:00 AM EDT"},
+                    {"name": "Accepted", "value": "Dec 5, 3:00 AM EDT"},
+                    {"name": "To be executed", "value": "Dec 5, 3:00 AM EDT"},
+                ],
+                "moves": [
+                    {
+                        "draftPick": {"year": 2025, "round": 2, "origOwnerTeam": {"id": "er0c60arm15b60vy"}},
+                        "from": {"teamId": "er0c60arm15b60vy"},
+                        "to": {"teamId": "e28qwtvwm15b60vy"},
+                    },
+                    {
+                        "draftPick": {"year": 2025, "round": 10, "origOwnerTeam": {"id": "e28qwtvwm15b60vy"}},
+                        "from": {"teamId": "e28qwtvwm15b60vy"},
+                        "to": {"teamId": "er0c60arm15b60vy"},
+                    },
+                    {
+                        "scorer": {
+                            "teamName": "Colorado Avalanche",
+                            "scorerId": "02f9l",
+                            "posIdsNoFlex": ["206"],
+                            "posShortNames": "C",
+                            "icons": [],
+                            "posIds": ["206", "208"],
+                            "name": "Nathan MacKinnon",
+                            "teamShortName": "COL",
+                            "shortName": "N. MacKinnon",
+                        },
+                        "scorePerGame": 10.5,
+                        "score": 852.5,
+                        "from": {"teamId": "e28qwtvwm15b60vy"},
+                        "to": {"teamId": "er0c60arm15b60vy"},
+                    },
+                ],
+            },
+        )
+        self.assertEqual(
+            str(pending_trade),
+            (
+                "From: Kashyyyk Wookies 🏴‍☠️ To: Dude Where’s Makar? Pick: 2025, Round 2 (Kashyyyk Wookies 🏴‍☠️)\n"
+                "From: Dude Where’s Makar? To: Kashyyyk Wookies 🏴‍☠️ Pick: 2025, Round 10 (Dude Where’s Makar?)\n"
+                "From: Dude Where’s Makar? To: Kashyyyk Wookies 🏴‍☠️ TradePlayer: Nathan MacKinnon C - COL 10.5 852.5"
+            ),
+        )
 
     def test_trade_block(self) -> None:
         self.assertRaises(NotLoggedIn, self.league.pending_trades)
